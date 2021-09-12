@@ -1,8 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+export type DeviceDocument = Device & Document;
+
 @Schema({ timestamps: true })
-export class Device extends Document {
+export class Device {
   @Prop({ required: true })
   name: string;
 

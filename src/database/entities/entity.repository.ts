@@ -3,7 +3,14 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
-import { Document, FilterQuery, Model, UpdateQuery } from 'mongoose';
+import {
+  Document,
+  FilterQuery,
+  Model,
+  UpdateQuery,
+  PopulateOptions,
+  Aggregate,
+} from 'mongoose';
 import { ResponseFormat } from '../../utils/response.util';
 
 export abstract class EntityRepository<T extends Document> {
@@ -12,13 +19,46 @@ export abstract class EntityRepository<T extends Document> {
     private nameModel: string,
   ) {}
 
+  async find(
+    entityFilterQuery?: FilterQuery<T>,
+    projection?: Record<string, unknown>,
+  ): Promise<ResponseFormat<T[]> | NotFoundException> {
+    const modelFounds = await this.entityModel.find(entityFilterQuery, {
+      __v: 0,
+      ...projection,
+    });
+    if (!modelFounds && modelFounds.length == 0)
+      throw new NotFoundException(`${this.nameModel} not found`);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `${this.nameModel} founds`,
+      data: modelFounds,
+    };
+  }
+
+  async findAgregate(
+    aggregate: Aggregate<T>[],
+  ): Promise<ResponseFormat<T[]> | NotFoundException> {
+    const modelFounds = await this.entityModel.aggregate(aggregate);
+    if (!modelFounds && modelFounds.length == 0)
+      throw new NotFoundException(`${this.nameModel} not found`);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `${this.nameModel} founds`,
+      data: modelFounds,
+    };
+  }
+
   async findOne(
     entityFilterQuery?: FilterQuery<T>,
-    projection?: Record<string, T>,
-  ): Promise<ResponseFormat | NotFoundException> {
-    const modelFound = await this.entityModel
-      .findOne(entityFilterQuery, { __v: 0, ...projection })
-      .exec();
+    projection?: Record<string, unknown>,
+    populateOptions?: PopulateOptions,
+  ): Promise<ResponseFormat<T> | NotFoundException> {
+    const modelFound = await this.entityModel.findOne(entityFilterQuery, {
+      __v: 0,
+      ...projection,
+    });
+    // .populate(populateOptions);
     if (!modelFound) {
       throw new NotFoundException(`${this.nameModel} not found`);
     }
@@ -29,22 +69,9 @@ export abstract class EntityRepository<T extends Document> {
     };
   }
 
-  async find(
-    entityFilterQuery?: FilterQuery<T>,
-  ): Promise<ResponseFormat | NotFoundException> {
-    const devices = await this.entityModel.find(entityFilterQuery);
-    if (!devices && devices.length == 0)
-      throw new BadRequestException(`${this.nameModel} create error`);
-    return {
-      statusCode: HttpStatus.OK,
-      message: `${this.nameModel} found`,
-      data: devices,
-    };
-  }
-
   async create(
     createEntityData: any,
-  ): Promise<ResponseFormat | BadRequestException> {
+  ): Promise<ResponseFormat<T> | BadRequestException> {
     const newModel = new this.entityModel(createEntityData);
     const modelCreated = await newModel.save();
     if (!modelCreated)
@@ -59,7 +86,7 @@ export abstract class EntityRepository<T extends Document> {
   async update(
     entityFilterQuery: FilterQuery<T>,
     updateEntityData: UpdateQuery<T>,
-  ): Promise<ResponseFormat | NotFoundException> {
+  ): Promise<ResponseFormat<T> | NotFoundException> {
     const modelUpdated = await this.entityModel.findOneAndUpdate(
       entityFilterQuery,
       updateEntityData,
@@ -74,7 +101,7 @@ export abstract class EntityRepository<T extends Document> {
     };
   }
 
-  async delete(id: string): Promise<ResponseFormat | NotFoundException> {
+  async delete(id: string): Promise<ResponseFormat<T> | NotFoundException> {
     const modelFound = await this.entityModel.findByIdAndDelete(id);
     if (!modelFound) throw new NotFoundException(`${this.nameModel} not found`);
     return {

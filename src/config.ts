@@ -6,7 +6,6 @@ export default registerAs('config', () => {
       uri: process.env.MONGO_URI,
       dbName: process.env.MONGO_DBNAME,
     },
-    apiKey: process.env.API_KEY,
     jwtSecret: process.env.JWT_SECRET,
   };
 });

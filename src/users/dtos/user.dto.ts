@@ -49,9 +49,9 @@ export class CreateUserDto {
   @MinLength(6)
   avatar: string;
 
-  @IsString()
+  @IsArray()
   @IsOptional()
-  role: string;
+  roles: string[];
 
   @IsString()
   @IsNotEmpty()

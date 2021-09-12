@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ResponseFormat } from 'src/utils/response.util';
 
 import { CreateDeviceDto, UpdateDeviceDto } from '../dtos/device.dto';
+import { Device, DeviceDocument } from '../entities/device.entity';
 import { DevicesRepository } from '../repositories/devices.repository';
 
 @Injectable()
@@ -11,7 +13,9 @@ export class DevicesService {
     return this.devicesRepository.find();
   }
 
-  getOne(id: string) {
+  async getOne(
+    id: string,
+  ): Promise<ResponseFormat<DeviceDocument> | NotFoundException> {
     return this.devicesRepository.findOne({ _id: id });
   }
 

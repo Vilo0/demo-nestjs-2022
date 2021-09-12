@@ -25,7 +25,7 @@ export class User extends Document {
   avatar: string;
 
   @Prop()
-  role: string;
+  roles: string[];
 
   @Prop({ required: true })
   password: string;

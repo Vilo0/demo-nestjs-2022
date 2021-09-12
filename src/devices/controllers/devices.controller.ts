@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -19,6 +20,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MongoIdPipe } from '../../common/mongo-id.pipe';
 import { CreateDeviceDto, UpdateDeviceDto } from '../dtos/device.dto';
 import { DevicesService } from '../services/devices.service';
+import { DeviceDocument } from '../entities/device.entity';
+import { ResponseFormat } from 'src/utils/response.util';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('devices')
@@ -28,19 +31,19 @@ export class DevicesController {
 
   @Public()
   @Get()
-  get() {
+  async get() {
     return this.devicesService.get();
   }
 
-  // @Roles(Role.CUSTOMER)
   @Public()
   @Get(':id')
-  getOne(@Param('id', MongoIdPipe) id: string) {
+  async getOne(
+    @Param('id', MongoIdPipe) id: string,
+  ): Promise<ResponseFormat<DeviceDocument> | NotFoundException> {
     return this.devicesService.getOne(id);
   }
 
-  // @Roles(Role.ADMIN)
-  @Public()
+  @Roles(Role.ADMIN, Role.CUSTOMER)
   @Post()
   create(@Body() payload: CreateDeviceDto) {
     return this.devicesService.create(payload);
