@@ -27,7 +27,6 @@ export class PostsController {
     return this.postsService.get();
   }
 
-
   @Get(':id')
   async getOne(
     @Param('id', MongoIdPipe) id: string,
@@ -41,10 +40,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  update(
-    @Param('id', MongoIdPipe) id: string,
-    @Body() payload: UpdatePostDto,
-  ) {
+  update(@Param('id', MongoIdPipe) id: string, @Body() payload: UpdatePostDto) {
     return this.postsService.update(id, payload);
   }
 
