@@ -24,6 +24,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Safe Wave v2')

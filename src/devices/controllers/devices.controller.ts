@@ -43,7 +43,7 @@ export class DevicesController {
     return this.devicesService.getOne(id);
   }
 
-  @Roles(Role.ADMIN, Role.CUSTOMER)
+  @Public()
   @Post()
   create(@Body() payload: CreateDeviceDto) {
     return this.devicesService.create(payload);
